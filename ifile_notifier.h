@@ -9,8 +9,8 @@ namespace FileUtils
 {
     enum class FileEvents : int
     {
-        FE_MODIFIED,
-        FE_CREATED
+        FE_CREATED,
+        FE_MODIFIED
     };
 
     //  Collection of files logically grouped to become a

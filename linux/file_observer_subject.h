@@ -25,7 +25,7 @@ namespace FileUtils
             std::function<bool(std::filesystem::path, FileEvents)>& callback
             ) override;
 
-        //  ISubject methods
+        //  ISubject methods (inherited)
         virtual int get_handle() override
         {
             return m_notifyFd;

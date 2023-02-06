@@ -55,7 +55,6 @@ void FileObserver::watcherThreadFunc(std::function<bool(ISubject<int> *)> callba
     auto subjIter { m_subjectsList.begin() };
     for (size_t i = 0; i < fds.size() && subjIter != m_subjectsList.end(); i++, subjIter++)
     {
-        std::cout << typeid(subjIter->first).name() << " -> " << typeid(subjIter->second).name() << std::endl;
         fds[i].fd = subjIter->first;
         fds[i].events = POLLIN;
         fds[i].revents = 0;
@@ -64,8 +63,6 @@ void FileObserver::watcherThreadFunc(std::function<bool(ISubject<int> *)> callba
     bool continuePolling { true };
     do
     {
-        std::cout << "fds.size(): " << fds.size() << std::endl;
-
         auto signalledFds { poll(fds.data(), fds.size(), m_pollTimeoutInMs) };
         if (signalledFds < 0)
         {
@@ -104,6 +101,4 @@ void FileObserver::watcherThreadFunc(std::function<bool(ISubject<int> *)> callba
         }
 
     } while (continuePolling);
-
-    std::cout << "Stopped watching" << std::endl;
 }

@@ -1,25 +1,28 @@
-CC				:= g++-9
-LINKER			:= g++-9
-CFLAGS			:= -Wall -Werror -std=c++17 -g
-COMPILE_OPTIONS := -DIGNORE_DIRECTORIES
-LINKER_FLAGS	:= -L/usr/local/lib -lgtest -lgtest_main -lpthread
+CC					:= g++-9
+LINKER				:= g++-9
+CFLAGS				:= -Wall -Werror -std=c++17 -g
+COMPILE_OPTIONS 	:= -DIGNORE_DIRECTORIES
+LINKER_FLAGS		:= -lpthread
+TEST_LINKER_FLAGS	:= -L/usr/local/lib -lgtest -lgtest_main -lpthread
 
-BINARY			:= hotbackup
-SRC_DIR			:= .
-OBJ_DIR			:= obj
-COMMON_SOURCES	:= $(wildcard ./*.cpp)
-LINUX_SOURCES	:= $(wildcard ./linux/*.cpp)
-COMMON_OBJECTS	:= $(COMMON_SOURCES:./%.cpp=./obj/%.o)
-LINUX_OBJECTS	:= $(LINUX_SOURCES:./linux/%.cpp=./obj/%.o)
+BINARY				:= hotbackup
+OBJ_DIR				:= obj
 
-TEST_OBJ_DIR	:= $(OBJ_DIR)
-TEST_SRC_DIR	:= ./tests
+LINUX_SOURCES		:= $(wildcard ./linux/*.cpp)
+LINUX_OBJECTS		:= $(LINUX_SOURCES:./linux/%.cpp=./obj/%.o)
 
-TEST_BINARY		:= test
-TEST_SOURCES	:= $(wildcard tests/*.cpp)
-TEST_OBJS		:= $(TEST_SOURCES:tests/%.cpp=obj/%.o)
+COMMON_SOURCES		:= $(wildcard ./*.cpp)
+COMMON_OBJECTS		:= $(COMMON_SOURCES:./%.cpp=./obj/%.o)
 
-MKDIR_P			:= mkdir -p
+TEST_OBJ_DIR		:= $(OBJ_DIR)
+TEST_SRC_DIR		:= ./unit_tests
+
+TEST_BINARY			:= tests
+TEST_SOURCES		:= $(wildcard unit_tests/*.cpp)
+TEST_OBJS			:= $(TEST_SOURCES:unit_tests/%.cpp=obj/%.o)
+
+MKDIR_P				:= mkdir -p
+
 
 all: create_directories build_project
 
@@ -36,12 +39,16 @@ $(OBJ_DIR)/%.o: %.cpp
 $(OBJ_DIR)/%.o: linux/%.cpp
 	$(CC) $(CFLAGS) $(COMPILE_OPTIONS) -c -o $@ $^
 
+
 # Build tests
-test: $(TEST_OBJS)
-	$(LINKER) -o $(TEST_BINARY) $^ $(LINKER_FLAGS)
+tests: create_directories build_tests
+
+build_tests: $(TEST_OBJS) $(LINUX_OBJECTS) $(filter-out ./obj/main.o, $(COMMON_OBJECTS))
+	$(LINKER) -o $(TEST_BINARY) $^ $(LINKER_FLAGS) $(TEST_LINKER_FLAGS)
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_SRC_DIR)/%.cpp
-	$(CC) $(CFLAGS) $(COMPILE_OPTIONS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(COMPILE_OPTIONS) -o $@ -c $<
+
 
 # Create directories
 .PHONY: create_directories

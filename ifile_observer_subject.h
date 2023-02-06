@@ -12,13 +12,13 @@ namespace FileUtils
     class IFileObserverSubject : public IFileNotifier, public ISubject<T>
     {
     public:
-        //  IFileNotifier methods
+        //  IFileNotifier methods (inherited)
         virtual void add_file(const std::filesystem::path& targetFile) = 0;
         virtual void remove_file(const std::filesystem::path& targetFile) = 0;
         virtual void get_changed_files_list(
             std::function<bool(std::filesystem::path, FileEvents)>& callback) = 0;
 
-        //  ISubject methods
+        //  ISubject methods (inherited)
         virtual T get_handle() = 0;
     };
 }
