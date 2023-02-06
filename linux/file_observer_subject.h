@@ -3,7 +3,8 @@
 #include <string>
 #include <vector>
 #include <sys/inotify.h>
-#include "../ifile_notifier_target.h"
+#include "../isubject.h"
+#include "../ifile_notifier.h"
 #include "../ifile_observer_subject.h"
 
 namespace FileUtils
@@ -14,7 +15,7 @@ namespace FileUtils
         FileObserverSubject();
         virtual ~FileObserverSubject();
 
-        //  IFileNotifierTarget methods
+        //  IFileNotifier methods
         virtual void add_file(const std::filesystem::path& targetFile) override;
 
         virtual void remove_file(const std::filesystem::path& targetFile) override;
@@ -25,7 +26,10 @@ namespace FileUtils
             ) override;
 
         //  ISubject methods
-        virtual int get_handle() override;
+        virtual int get_handle() override
+        {
+            return m_notifyFd;
+        }
 
     private:
         int m_notifyFd;

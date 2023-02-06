@@ -1,0 +1,12 @@
+{
+    "files.exclude": {
+        "hotbackup": true,
+        ".gitignore": true,
+        "obj": true
+    },
+    "files.associations": {
+        "stdexcept": "cpp",
+        "*.tcc": "cpp",
+        "thread": "cpp"
+    }
+}

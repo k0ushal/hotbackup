@@ -1,20 +1,26 @@
 
-#include "../ifile_notifier_target.h"
-#include "../isubject.h"
+#ifndef _IFILE_OBJSERVER_SUBJECT_H_
+#define _IFILE_OBJSERVER_SUBJECT_H_
+
+
+#include "ifile_notifier.h"
+#include "isubject.h"
 
 namespace FileUtils
 {
     template<typename T>
-    class IFileObserverSubject : public IFileNotifierTarget, public ISubject<T>
+    class IFileObserverSubject : public IFileNotifier, public ISubject<T>
     {
     public:
-        //  IFileNotifierTarget methods
+        //  IFileNotifier methods
         virtual void add_file(const std::filesystem::path& targetFile) = 0;
         virtual void remove_file(const std::filesystem::path& targetFile) = 0;
         virtual void get_changed_files_list(
             std::function<bool(std::filesystem::path, FileEvents)>& callback) = 0;
 
         //  ISubject methods
-        virtual T get_handle();
+        virtual T get_handle() = 0;
     };
 }
+
+#endif  //  _IFILE_OBJSERVER_SUBJECT_H_

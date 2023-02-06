@@ -4,7 +4,6 @@
 #include <sstream>
 #include <exception>
 #include <unistd.h>
-#include "ifile_notifier_target.h"
 #include "file_observer_subject.h"
 
 using FileUtils::FileObserverSubject;
@@ -120,12 +119,10 @@ void FileObserverSubject::get_changed_files_list(
                 event = FileEvents::FE_CREATED;
 
             continueEnumeration = callback(filePath, event);
+            bytesProcessed += (sizeof(inotify_event) + pEvt->len);
 
         } while (continueEnumeration && bytesProcessed < readLen);
     }
 }
 
-int FileObserverSubject::get_handle()
-{
-    return m_notifyFd;
-}
+// int FileObserverSubject::get_handle()

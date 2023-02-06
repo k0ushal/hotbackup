@@ -7,12 +7,15 @@
 #include <string.h>
 #include <sys/inotify.h>
 #include "isubject.h"
-#include "linux/file_notifier.h"
-#include "linux/file_notifier_target.h"
+#include "ifile_observer.h"
+#include "ifile_observer_subject.h"
+#include "hotbackup_factory.h"
 
 using FileUtils::ISubject;
-using FileUtils::FileNotifier;
-using FileUtils::FileObserverSubject;
+using FileUtils::IFileObserver;
+using FileUtils::IFileObserverSubject;
+using FileUtils::FileEvents;
+using HotBackup::HotBackupFactory;
 
 int main(int argc, char* argv[])
 {
@@ -23,6 +26,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    const int infinitePolling { -1 };
     std::filesystem::path hotDirectory(argv[1]);
     std::filesystem::path backupDirectory(argv[2]);
 
@@ -31,78 +35,55 @@ int main(int argc, char* argv[])
 
     std::cout << "Backup dir: " << backupDirectory << std::endl;
 
-    FileObserverSubject target;
-
-    target.add_file(argv[1]);
-
-    FileNotifier fwatch { std::vector<ISubject<int> *>{ target.get_handle() } };
-
-    auto func = [&](ISubject<int>* subject) {
-        
-    };
-    // fwatch.watch
-#if 0
-    //  POC
-    int fdNotify = inotify_init();
-    if (-1 == fdNotify)
+    try
     {
-        std::cerr << "inotify_init(errcode: " << errno << ")...FAILED" << std::endl;
-        return 0;
-    }
+        auto fileObserverSubject { HotBackupFactory::create_file_observer_subject() };
+        auto fileObserver { HotBackupFactory::create_file_observer(infinitePolling) };
 
-    int watchFlags = IN_MODIFY | IN_CREATE;
-    int wd = inotify_add_watch(fdNotify, hotDirectory.c_str(), watchFlags);
-    if (-1 == wd)
-    {
-        std::cerr << "inotify_add_watch (errcode: " << errno << ")...FAILED." << std::endl;
-        close(fdNotify);
-        return 0;
-    }
+        fileObserverSubject->add_file(hotDirectory);
 
-    struct inotify_event* pEvt;
-    char eventList[150];
+        fileObserver->add_subject(fileObserverSubject.get());
 
-    int count = 0;
-    while (true)
-    {
-        int len = 0;
-        std::cout << "Calling read" << std::endl;
-        len = read(fdNotify, eventList, 63);
-        if (len < 0)
+        std::function<bool(std::filesystem::path, FileEvents)> printChangedFiles = 
+        [&](std::filesystem::path filePath, FileEvents events) -> bool {
+
+            std::vector<std::string> eventNames { "Created", "Modified" };
+
+            std::cout << eventNames[(int)events] << ": " << filePath << std::endl;
+
+            return true;
+        };
+
+        auto watcherFunc = [&](ISubject<int>* subject) -> bool {
+
+            if (fileObserverSubject.get() == subject)
+            {
+                fileObserverSubject->get_changed_files_list(printChangedFiles);
+            }
+
+            return true;
+        };
+
+        fileObserver->start_observer(watcherFunc);
+
+        while (true)
         {
-            std::cerr << "read event (errcode: " << errno << "...FAILED." << std::endl;
-            break;
+            std::cout << "Waiting for input" << std::endl;
+            std::string input;
+            std::cin >> input;
+
+            if (0 == input.find("exit"))
+            {
+                std::cout << "Terminating..." << std::endl;
+                fileObserver->stop_observer();
+                break;
+            }
         }
-        std::cout << "Read " << len << " bytes" << std::endl;
-
-        int i = 0;
-        pEvt = reinterpret_cast<inotify_event *>(eventList);
-
-        while (i < len)
-        {
-            pEvt = (inotify_event *)(reinterpret_cast<char *>(pEvt) + i);
-            size_t recSize = sizeof(inotify_event) + pEvt->len;
-
-            std::cout << "File: (" << pEvt->name << ")" << std::endl;
-            std::cout << "File name len: " << pEvt->len << std::endl;
-            if (pEvt->mask & IN_CREATE)
-                std::cout << "  CREATED" << std::endl;
-            if (pEvt->mask & IN_MODIFY)
-                std::cout << "  MODIFIED" << std::endl;
-
-            std::cout << std::endl;
-            i += recSize;
-            count++;
-        }
-
-        if (count > 1)
-            break;
     }
-
-    inotify_rm_watch(fdNotify, wd);
-    close(fdNotify);
-
-#endif
+    catch (const std::exception& e)
+    {
+        std::cout << "Exception: " << e.what() << std::endl;
+    }
 
     return 0;
 }
