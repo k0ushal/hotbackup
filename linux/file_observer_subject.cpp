@@ -9,7 +9,8 @@
 using FileUtils::FileObserverSubject;
 using FileUtils::FileEvents;
 
-FileObserverSubject::FileObserverSubject()
+FileObserverSubject::FileObserverSubject(std::string name)
+    : m_name(name)
 {
     m_notifyFd = inotify_init1(IN_NONBLOCK);
     if (-1 == m_notifyFd)
@@ -23,6 +24,7 @@ FileObserverSubject::FileObserverSubject()
 FileObserverSubject::~FileObserverSubject()
 {
     close(m_notifyFd);
+    m_notifyFd = -99;
 }
 
 void FileObserverSubject::add_file(const std::filesystem::path& targetFile)
@@ -86,7 +88,7 @@ void FileObserverSubject::get_changed_files_list(
                 break;
 
             std::ostringstream msg;
-            msg << "read (notifyFd)(errcode: " << errno << ") FAILED.";
+            msg << "read (notifyFd: " << m_notifyFd << ")(errcode: " << errno << ") FAILED.";
             throw std::runtime_error(msg.str().c_str());
         }
 
@@ -124,5 +126,3 @@ void FileObserverSubject::get_changed_files_list(
         } while (continueEnumeration && bytesProcessed < readLen);
     }
 }
-
-// int FileObserverSubject::get_handle()

@@ -13,6 +13,8 @@ namespace FileUtils
     {
     public:
         virtual T get_handle() = 0;
+
+        virtual std::string name() = 0;
     };
 }
 

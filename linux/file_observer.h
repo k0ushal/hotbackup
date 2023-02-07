@@ -3,7 +3,7 @@
 #define _FILE_OBSERVER_H_
 
 #include <iostream>
-#include <unordered_map>
+#include <map>
 #include <exception>
 #include <vector>
 #include <thread>
@@ -24,7 +24,7 @@ namespace FileUtils
 
         virtual ~FileObserver();
 
-        virtual void add_subject(ISubject<int>* target) override;
+        virtual void add_subject(std::shared_ptr<ISubject<int>> target) override;
 
         //  This is a non-blocking call. The class spawns a separate thread
         //  and watches for changes to any of the registered subjects
@@ -34,14 +34,14 @@ namespace FileUtils
         //  continue watching.
         //  If the callback returns false, the watcher thread stops
         //  watching
-        virtual void start_observer(std::function<bool(ISubject<int> *)> callback) override;
+        virtual void start_observer(std::function<bool(std::shared_ptr<ISubject<int>>)> callback) override;
         virtual void stop_observer() override;
 
     private:
-        void watcherThreadFunc(std::function<bool(ISubject<int> *)> callback);
+        void watcherThreadFunc(std::function<bool(std::shared_ptr<ISubject<int>>)> callback);
 
     private:
-        std::unordered_map<int, ISubject<int>*> m_subjectsList;
+        std::map<int, std::shared_ptr<ISubject<int>>> m_subjectsList;
         std::thread m_watcherThread;
         int m_pollTimeoutInMs;
         std::shared_ptr<Controller> m_controller;

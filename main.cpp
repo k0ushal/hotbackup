@@ -37,12 +37,12 @@ int main(int argc, char* argv[])
 
     try
     {
-        auto fileObserverSubject { HotBackupFactory::create_file_observer_subject() };
+        auto fileObserverSubject { HotBackupFactory::create_file_observer_subject("file-notifier") };
         auto fileObserver { HotBackupFactory::create_file_observer(infinitePolling) };
 
         fileObserverSubject->add_file(hotDirectory);
 
-        fileObserver->add_subject(fileObserverSubject.get());
+        fileObserver->add_subject(fileObserverSubject);
 
         std::function<bool(std::filesystem::path, FileEvents)> printChangedFiles = 
         [&](std::filesystem::path filePath, FileEvents events) -> bool {
@@ -54,9 +54,9 @@ int main(int argc, char* argv[])
             return true;
         };
 
-        auto watcherFunc = [&](ISubject<int>* subject) -> bool {
+        auto watcherFunc = [&](std::shared_ptr<ISubject<int>> subject) -> bool {
 
-            if (fileObserverSubject.get() == subject)
+            if (fileObserverSubject == subject)
             {
                 fileObserverSubject->get_changed_files_list(printChangedFiles);
             }

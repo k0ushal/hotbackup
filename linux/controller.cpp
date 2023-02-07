@@ -58,3 +58,8 @@ int Controller::get_handle()
 {
     return m_fdReadController;
 }
+
+std::string Controller::name()
+{
+    return "controller";
+}

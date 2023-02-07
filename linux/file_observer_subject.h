@@ -12,7 +12,7 @@ namespace FileUtils
     class FileObserverSubject : public IFileObserverSubject<int>
     {
     public:
-        FileObserverSubject();
+        FileObserverSubject(std::string name);
         virtual ~FileObserverSubject();
 
         //  IFileNotifier methods
@@ -31,8 +31,14 @@ namespace FileUtils
             return m_notifyFd;
         }
 
+        virtual std::string name() override
+        {
+            return m_name;
+        }
+
     private:
         int m_notifyFd;
+        std::string m_name;
         std::unordered_map<std::string, int> m_filepathToWatchIndex;
         std::unordered_map<int, std::string> m_watchToFilepathIndex;
     };

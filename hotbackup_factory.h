@@ -15,7 +15,7 @@ namespace HotBackup
     {
     public:
         static std::shared_ptr<IFileObserver<int>> create_file_observer(int pollTimeoutInMs = 5000);
-        static std::shared_ptr<IFileObserverSubject<int>> create_file_observer_subject();
+        static std::shared_ptr<IFileObserverSubject<int>> create_file_observer_subject(std::string name);
 
         static std::shared_ptr<IFileBackupQueue> create_file_backup_queue();
     };

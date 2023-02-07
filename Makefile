@@ -15,11 +15,11 @@ COMMON_SOURCES		:= $(wildcard ./*.cpp)
 COMMON_OBJECTS		:= $(COMMON_SOURCES:./%.cpp=./obj/%.o)
 
 TEST_OBJ_DIR		:= $(OBJ_DIR)
-TEST_SRC_DIR		:= ./unit_tests
+TEST_SRC_DIR		:= ./unit-tests
 
 TEST_BINARY			:= tests
-TEST_SOURCES		:= $(wildcard unit_tests/*.cpp)
-TEST_OBJS			:= $(TEST_SOURCES:unit_tests/%.cpp=obj/%.o)
+TEST_SOURCES		:= $(wildcard unit-tests/*.cpp)
+TEST_OBJS			:= $(TEST_SOURCES:unit-tests/%.cpp=obj/%.o)
 
 MKDIR_P				:= mkdir -p
 
@@ -44,7 +44,7 @@ $(OBJ_DIR)/%.o: linux/%.cpp
 tests: create_directories build_tests
 
 build_tests: $(TEST_OBJS) $(LINUX_OBJECTS) $(filter-out ./obj/main.o, $(COMMON_OBJECTS))
-	$(LINKER) -o $(TEST_BINARY) $^ $(LINKER_FLAGS) $(TEST_LINKER_FLAGS)
+	$(LINKER) -o $(TEST_BINARY) $^ $(TEST_LINKER_FLAGS)
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_SRC_DIR)/%.cpp
 	$(CC) $(CFLAGS) $(COMPILE_OPTIONS) -o $@ -c $<

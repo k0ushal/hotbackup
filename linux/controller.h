@@ -27,6 +27,8 @@ namespace FileUtils
         //  ISubject methods
         virtual int get_handle() override;
 
+        virtual std::string name() override;
+
     private:
         int m_fdReadController;
         int m_fdWriteController;

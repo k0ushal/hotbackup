@@ -16,9 +16,9 @@ std::shared_ptr<IFileObserver<int>> HotBackupFactory::create_file_observer(
     return std::make_shared<FileObserver>(pollTimeoutInMs);
 }
 
-std::shared_ptr<IFileObserverSubject<int>> HotBackupFactory::create_file_observer_subject()
+std::shared_ptr<IFileObserverSubject<int>> HotBackupFactory::create_file_observer_subject(std::string name)
 {
-    return std::make_shared<FileObserverSubject>();
+    return std::make_shared<FileObserverSubject>(name);
 }
 
 std::shared_ptr<IFileBackupQueue> HotBackupFactory::create_file_backup_queue()

@@ -15,7 +15,7 @@ namespace HotBackup_UnitTests
     {
     protected:
         IFileObserverSubject_UnitTest() :
-            m_subject(HotBackupFactory::create_file_observer_subject())
+            m_subject(HotBackupFactory::create_file_observer_subject("test-notifier"))
         {
             m_fileEventStrings = {"created", "modified"};
             std::filesystem::create_directory(m_testingDirectory);
@@ -24,15 +24,16 @@ namespace HotBackup_UnitTests
 
         ~IFileObserverSubject_UnitTest()
         {
-            std::filesystem::remove_all(m_testingDirectory);
         }
 
         void SetUp() override
         {
+            std::filesystem::create_directory(m_testingDirectory);
         }
 
         void TearDown() override
         {
+            std::filesystem::remove_all(m_testingDirectory);
         }
 
     public:
@@ -60,11 +61,13 @@ namespace HotBackup_UnitTests
 
         ASSERT_TRUE(result.str() == "(f1-created)(f2-created)");
 
+        result.str("");
+
         //  Modify a file
         f1 << "Hello";
-        result.clear();
+        f1.flush();
+        
         m_subject->get_changed_files_list(getChangedFilesList);
-        std::cout << "Actual: " << result.str() << std::endl;
         ASSERT_TRUE(result.str() == "(f1-modified)");
     }
 }

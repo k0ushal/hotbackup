@@ -1,5 +1,6 @@
 
 #include <vector>
+#include <unistd.h>
 #include <exception>
 #include <functional>
 #include "../isubject.h"
@@ -13,14 +14,15 @@ FileObserver::FileObserver(int pollTimeoutInMs) :
     m_pollTimeoutInMs(pollTimeoutInMs),
     m_controller(std::make_shared<Controller>())
 {
-    add_subject(m_controller.get());
+    add_subject(m_controller);
 }
 
 FileObserver::~FileObserver()
 {
+    stop_observer();
 }
 
-void FileObserver::add_subject(ISubject<int>* subject)
+void FileObserver::add_subject(std::shared_ptr<ISubject<int>> subject)
 {
     if (!subject)
         throw std::invalid_argument("Invalid argument");
@@ -32,7 +34,7 @@ void FileObserver::add_subject(ISubject<int>* subject)
     m_subjectsList[subject->get_handle()] = subject;
 }
 
-void FileObserver::start_observer(std::function<bool(ISubject<int> *)> callback)
+void FileObserver::start_observer(std::function<bool(std::shared_ptr<ISubject<int>>)> callback)
 {
     if (m_watcherThread.joinable())
         return;
@@ -48,12 +50,14 @@ void FileObserver::stop_observer()
         m_watcherThread.join();
 }
 
-void FileObserver::watcherThreadFunc(std::function<bool(ISubject<int> *)> callback)
+void FileObserver::watcherThreadFunc(std::function<bool(std::shared_ptr<ISubject<int>>)> callback)
 {
     std::vector<pollfd> fds(m_subjectsList.size());
 
     auto subjIter { m_subjectsList.begin() };
-    for (size_t i = 0; i < fds.size() && subjIter != m_subjectsList.end(); i++, subjIter++)
+    for (size_t i = 0;
+        i < fds.size() && subjIter != m_subjectsList.end();
+        i++, subjIter++)
     {
         fds[i].fd = subjIter->first;
         fds[i].events = POLLIN;
@@ -73,31 +77,27 @@ void FileObserver::watcherThreadFunc(std::function<bool(ISubject<int> *)> callba
             continue;
         }
 
-        while (signalledFds > 0)
+        for (size_t i = 0;
+            i < fds.size() && signalledFds > 0 && continuePolling;
+            i++)
         {
-            for (size_t i = 0; i < fds.size(); i++)
+            if (POLLIN & fds[i].revents)
             {
-                if (POLLIN & fds[i].revents)
+                fds[i].revents = 0;
+
+                auto signalledSubject { m_subjectsList[fds[i].fd] };
+
+                //  check if stop_observing is called.
+                if (signalledSubject == m_controller)
                 {
-                    fds[i].revents = 0;
-
-                    auto signalledSubject { m_subjectsList[fds[i].fd] };
-
-                    //  check if stop_observing is called.
-                    if (signalledSubject == m_controller.get())
-                    {
-                        continuePolling = false;
-                        signalledFds = 0;
-                        break;
-                    }
-
-                    //  notify registered subjects.
-                    continuePolling = callback(signalledSubject);
-                    if (!continuePolling)
-                        break;
+                    continuePolling = false;
+                    break;
                 }
+
+                //  notify registered subjects.
+                continuePolling = callback(signalledSubject);
+                signalledFds--;
             }
-            signalledFds--;
         }
 
     } while (continuePolling);
