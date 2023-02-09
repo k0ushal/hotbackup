@@ -2,6 +2,9 @@
 #define _FILE_DELETER_PLUGIN_H_
 
 #include <memory>
+#include <mutex>
+#include <future>
+#include <atomic>
 #include <filesystem>
 #include "ilogger.h"
 #include "ifile_backup_plugin.h"
@@ -13,6 +16,10 @@ namespace BackupManagement
     class FileDeleterPlugin : public IFileBackupPlugin
     {
     public:
+        FileDeleterPlugin();
+
+        virtual ~FileDeleterPlugin();
+
         virtual void init(
             std::shared_ptr<ILogger> logger,
             const std::filesystem::path& backupDirectory) override;
@@ -21,18 +28,31 @@ namespace BackupManagement
             const std::filesystem::path& sourceFile,
             bool& continueExecutingOtherPlugins) override;
 
+        virtual void shutdown() override;
+
     protected:
         //  Assumes that sourceFile name has delete_ prefix.
-        virtual std::filesystem::path get_backup_file_path(
-            const std::filesystem::path& sourceFilePath);
-
         virtual std::tuple<std::string, std::string> get_filename_and_deletion_time(
             const std::filesystem::path& sourceFilePath);
+
+        //  Assumes that all args are valid.
+        virtual void schedule_files_for_deletion(
+            std::vector<std::filesystem::path> filepaths,
+            std::string isoTimestamp);
+
+        virtual std::chrono::seconds get_waiting_time_before_deletion(
+            std::string isoTimestamp);
 
     private:
         std::shared_ptr<ILogger> m_logger;
         const std::string m_deleteFilePrefix { "delete_" };
         std::filesystem::path m_backupDirectory;
+        std::atomic_bool m_shutdown { false };
+
+        std::mutex m_scheduledDeletionThreadsMutex;
+        std::condition_variable m_scheduledDeletionThreadsCondVar;
+        std::vector<std::future<void>> m_scheduledDeletionFutures;
+        // std::vector<std::thread
     };
 }
 

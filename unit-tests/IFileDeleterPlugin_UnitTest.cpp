@@ -1,9 +1,12 @@
 
 #include <gtest/gtest.h>
+#include <chrono>
 #include "IFile_Deleter_Plugin_Mock.h"
 
 using BackupManagement::IFileBackupPlugin;
 using HotBackup_UnitTests::IFileDeleterPlugin_Mock;
+
+using namespace std::chrono_literals;
 
 namespace HotBackup_UnitTests
 {
@@ -51,5 +54,20 @@ namespace HotBackup_UnitTests
         auto [filename, deletionTime] = m_fileDeleterPlugin->process_file_name(filepath);
         ASSERT_EQ(filename, "abc");
         ASSERT_EQ(deletionTime, "2022-01-21T09:21:00Z");
+    }
+
+    TEST_F(IFileDeleterPlugin_UnitTest, ISO_timestamp_to_waiting_duration)
+    {
+        auto fiveMins17secFromNow = std::chrono::system_clock::now() + std::chrono::minutes(5) + std::chrono::seconds(17);
+        auto tt { std::chrono::system_clock::to_time_t(fiveMins17secFromNow) };
+        auto lt { std::localtime(&tt) };
+
+        std::ostringstream timestamp;
+        timestamp << std::put_time(lt, "%Y-%m-%dT%H:%M:%SZ");
+
+        auto waitingTime { m_fileDeleterPlugin->get_waiting_time_before_deletion(timestamp.str()) };
+
+        //  Account for 1 sec tolerance.
+        ASSERT_TRUE(waitingTime.count() >= 316 && waitingTime.count() <= 317);
     }
 }

@@ -15,6 +15,11 @@ namespace HotBackup_UnitTests
         {
             return get_filename_and_deletion_time(filePath);
         }
+
+        std::chrono::seconds get_waiting_time_before_deletion(std::string timestamp)
+        {
+            return FileDeleterPlugin::get_waiting_time_before_deletion(timestamp);
+        }
     };
 }
 

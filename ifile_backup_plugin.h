@@ -19,6 +19,8 @@ namespace BackupManagement
         virtual void execute(
             const std::filesystem::path& sourceFile,
             bool& continueExecutingOtherPlugins) = 0;
+
+        virtual void shutdown() = 0;
     };
 }
 

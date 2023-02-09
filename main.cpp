@@ -101,3 +101,4 @@ int main(int argc, char* argv[])
 //  Replace const & with movable objects.
 //  Remove unnecessary copy constructors and move operators
 //  Change cout to cerr wherever applicable
+//  Assumption: class private/protected functions will trust all input args and not validate them.
