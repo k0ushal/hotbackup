@@ -24,11 +24,17 @@ namespace HotBackup
     class FileBackupQueue : public IFileBackupQueue
     {
     public:
+        FileBackupQueue();
+
+        virtual ~FileBackupQueue();
+
         //  IFileBackupQueueProducer methods (inherited)
         virtual void push_item(const std::filesystem::path& filePath) override;
 
         //  IFileBackupQueueConsumer methods (inherited)
         virtual std::filesystem::path get_next_item(int timeoutInMs) override;
+
+        virtual void shutdown() override;
 
     private:
         //  Provides dedupe functionality
@@ -36,9 +42,9 @@ namespace HotBackup
 
         //  Maintains the order of incoming items.
         std::queue<std::filesystem::path> m_queue;
-        std::mutex m_queueMutex;
+        std::mutex m_mutex;
 
-        std::atomic_bool m_shutdown;
+        std::atomic_bool m_shutdown { false };
         std::condition_variable m_condVar;
     };
 }

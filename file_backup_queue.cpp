@@ -3,8 +3,20 @@
 
 using HotBackup::FileBackupQueue;
 
+FileBackupQueue::FileBackupQueue()
+{
+}
+
+FileBackupQueue::~FileBackupQueue()
+{
+    shutdown();
+}
+
 void FileBackupQueue::push_item(const std::filesystem::path& filePath)
 {
+    if (m_shutdown)
+        return;
+
     if (std::filesystem::is_directory(filePath))
     {
         std::ostringstream msg;
@@ -15,7 +27,7 @@ void FileBackupQueue::push_item(const std::filesystem::path& filePath)
     auto fPath { std::filesystem::canonical(filePath) };
 
     {
-        std::unique_lock lock(m_queueMutex);
+        std::unique_lock lock(m_mutex);
 
         if (m_uniqueFilePaths.count(fPath) > 0)
             return;
@@ -23,12 +35,17 @@ void FileBackupQueue::push_item(const std::filesystem::path& filePath)
         m_uniqueFilePaths.emplace(fPath);
         m_queue.push(fPath);
     }
+
+    m_condVar.notify_one();
 }
 
 std::filesystem::path FileBackupQueue::get_next_item(int timeoutInMs)
 {
+    if (m_shutdown)
+        return {};
+
     {
-        std::unique_lock lock(m_queueMutex);
+        std::unique_lock lock(m_mutex);
 
         m_condVar.wait_for(lock, std::chrono::milliseconds(timeoutInMs), [&] {
             return (!m_queue.empty() || m_shutdown);
@@ -43,4 +60,10 @@ std::filesystem::path FileBackupQueue::get_next_item(int timeoutInMs)
 
         return fPath;
     }
+}
+
+void FileBackupQueue::shutdown()
+{
+    m_shutdown = true;
+    m_condVar.notify_all();
 }

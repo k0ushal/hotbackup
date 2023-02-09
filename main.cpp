@@ -10,15 +10,23 @@
 #include "ifile_observer.h"
 #include "ifile_observer_subject.h"
 #include "hotbackup_factory.h"
+#include "ilogger.h"
 
 using FileUtils::ISubject;
 using FileUtils::IFileObserver;
 using FileUtils::IFileObserverSubject;
 using FileUtils::FileEvents;
 using HotBackup::HotBackupFactory;
+using HotBackup::ILogger;
 
 int main(int argc, char* argv[])
 {
+    #if 0
+    auto logger { HotBackupFactory::create_logger() };
+    logger->log("hello");
+    return 0;
+    #endif
+
     if (argc < 3)
     {
         std::cout << "Usage:" << std::endl;
@@ -87,3 +95,9 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+
+//  [TODO]
+//  Add virtual destructors to all interfaces
+//  Replace const & with movable objects.
+//  Remove unnecessary copy constructors and move operators
+//  Change cout to cerr wherever applicable

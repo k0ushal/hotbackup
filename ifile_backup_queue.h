@@ -16,6 +16,8 @@ namespace BackupManagement
 
         //  IFileBackupQueueConsumer methods (inherited)
         virtual std::filesystem::path get_next_item(int timeoutInMs) = 0;
+
+        virtual void shutdown() = 0;
     };
 }
 

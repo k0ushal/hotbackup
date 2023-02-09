@@ -5,17 +5,25 @@
 #include <sstream>
 #include "../ibackup_manager.h"
 #include "../hotbackup_factory.h"
+#include "../ilogger.h"
+#include "ILogger_Mock.h"
 
 using HotBackup::HotBackupFactory;
+using HotBackup::ILogger;
 using BackupManagement::IBackupManager;
+using HotBackup_Mocks::ILogger_Mock;
 
 namespace HotBackup_UnitTests
 {
     class IBackupManager_UnitTest : public testing::Test
     {
     protected:
-        IBackupManager_UnitTest()
+        IBackupManager_UnitTest() :
+            m_queue { HotBackupFactory::create_file_backup_queue() },
+            m_backupManager { HotBackupFactory::create_backup_manager() },
+            m_logger { std::make_shared<ILogger_Mock>() }
         {
+            m_backupManager->init(m_backupDirectory, std::dynamic_pointer_cast<IFileBackupQueueConsumer>(m_queue), m_logger);
         }
 
         ~IBackupManager_UnitTest()
@@ -24,18 +32,51 @@ namespace HotBackup_UnitTests
 
         void SetUp() override
         {
+            std::filesystem::create_directory(m_backupDirectory);
+            std::filesystem::create_directory(m_testingDirectory);
         }
 
         void TearDown() override
         {
+            std::filesystem::remove_all(m_testingDirectory);
+            std::filesystem::remove_all(m_backupDirectory);
+        }
+
+        std::filesystem::path create_file(std::string fname, const std::string& data)
+        {
+            auto fpath { m_testingDirectory / fname };
+            std::ofstream f1 { fpath };
+
+            if (not data.empty())
+            {
+                f1 << data;
+                f1.flush();
+            }
+
+            return fpath;
         }
 
     public:
-        std::shared_ptr<IBackupManager> m_backupQueue;
+        std::shared_ptr<IFileBackupQueue> m_queue;
+        std::shared_ptr<IBackupManager> m_backupManager;
+        std::shared_ptr<ILogger_Mock> m_logger;
+        std::filesystem::path m_backupDirectory { "/tmp/backup" };
+        std::filesystem::path m_testingDirectory { "/tmp/testing" };
     };
 
     TEST_F(IBackupManager_UnitTest, SmokeTest)
     {
-        ASSERT_TRUE(5 == 5);
+        m_backupManager->start_workers(1);
+
+        auto f1 { create_file("abc", "some text") };
+        m_queue->push_item(f1);
+
+        sleep(1);
+
+        std::string expectedSuccessMsg { std::string("SUCCESS:: backed up file (") + f1.c_str() + ")" };
+        ASSERT_TRUE(m_logger->get_logged_messages()[0].find(expectedSuccessMsg));
+
+        m_backupManager->stop_workers();
+        m_queue->shutdown();
     }
 }

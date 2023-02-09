@@ -88,4 +88,8 @@ namespace HotBackup_UnitTests
         ASSERT_TRUE(nextItem1.u8string() == (m_testingDirectory / "pqr").u8string());
         ASSERT_TRUE(nextItem2.u8string().empty());
     }
+
+    TEST_F(IFileBackupQueue_UnitTest, Multiple_Threads_Waiting_When_Shutdown_Is_Signalled)
+    {
+    }
 }

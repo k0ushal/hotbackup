@@ -8,6 +8,9 @@
         "stdexcept": "cpp",
         "*.tcc": "cpp",
         "thread": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "chrono": "cpp",
+        "cmath": "cpp",
+        "condition_variable": "cpp"
     }
 }
