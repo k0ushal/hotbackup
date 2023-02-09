@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <thread>
+#include <atomic>
 #include <condition_variable>
 #include "ibackup_manager.h"
 #include "ifile_backup_queue_consumer.h"
@@ -35,7 +36,7 @@ namespace BackupManagement
         std::shared_ptr<IFileBackupQueueConsumer> m_queue;
         std::shared_ptr<ILogger> m_logger;
         std::filesystem::path m_backupDirectory;
-        bool m_shutdown { false };
+        std::atomic_bool m_shutdown { false };
         // std::mutex m_mutex;
         // std::condition_variable m_condVar;
     };

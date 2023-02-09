@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <regex>
 #include "../ibackup_manager.h"
 #include "../hotbackup_factory.h"
 #include "../ilogger.h"
@@ -78,5 +79,67 @@ namespace HotBackup_UnitTests
 
         m_backupManager->stop_workers();
         m_queue->shutdown();
+    }
+
+    TEST_F(IBackupManager_UnitTest, Multiple_Workers_Verify_FileData)
+    {
+        m_backupManager->start_workers(3);
+
+        std::vector<std::string> filenames { "abc", "abd", "abe", "abf", "abg", "abh" };
+        std::vector<std::filesystem::path> filepaths;
+
+        //  create files
+        for (auto& file : filenames)
+        {
+            auto f { create_file(file, file) };
+            filepaths.push_back(f);
+        }
+
+        //  push them all on queue
+        for (auto& filepath : filepaths)
+            m_queue->push_item(filepath);
+
+        //  wait for threads to finish processing.
+        sleep(3);
+
+        //  Extract filenames from log messages.
+        std::regex pattern { "SUCCESS:: backed up file \\(\"/tmp/testing/([a-z]+)\"\\)" };
+        std::smatch match;
+        std::set<std::string> backedUpFiles;
+
+        auto logs { m_logger->get_logged_messages() };
+        for (auto& log : logs)
+        {
+            auto ret { std::regex_match(log, match, pattern) };
+            ASSERT_TRUE(ret);
+
+            backedUpFiles.emplace(match[1]);
+        }
+
+        //  Check that all files have been backed up
+        for (auto& f : filenames)
+            ASSERT_TRUE(backedUpFiles.count(f) > 0);
+
+        //  Verify file data
+        for (auto& filename : filenames)
+        {
+            auto fpath { m_backupDirectory / filename };
+            fpath += ".bak";
+
+            std::ifstream fStream { fpath };
+            std::string fileData;
+
+            fStream >> fileData;
+            ASSERT_EQ(filename, fileData);
+        }
+
+        m_backupManager->stop_workers();
+        m_queue->shutdown();
+    }
+
+    TEST_F(IBackupManager_UnitTest, Deleter_Plugin_SmokeTest)
+    {
+        // auto plugin { HotBackupFactory::create_deleter_plugin() };
+        // m_backupManager->add_plugin(plugin);
     }
 }

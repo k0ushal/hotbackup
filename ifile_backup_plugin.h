@@ -12,9 +12,13 @@ namespace BackupManagement
     class IFileBackupPlugin
     {
     public:
-        virtual void init(std::shared_ptr<ILogger> logger) = 0;
+        virtual void init(
+            std::shared_ptr<ILogger> logger,
+            const std::filesystem::path& backupDirectory) = 0;
 
-        virtual void execute(const std::filesystem::path& path, bool& continueExecutingOtherPlugins) = 0;
+        virtual void execute(
+            const std::filesystem::path& sourceFile,
+            bool& continueExecutingOtherPlugins) = 0;
     };
 }
 

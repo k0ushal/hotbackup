@@ -4,6 +4,7 @@
 #include "ifile_observer_subject.h"
 #include "ifile_backup_queue.h"
 #include "ibackup_manager.h"
+#include "ifile_backup_plugin.h"
 #include "ilogger.h"
 
 using FileUtils::IFileNotifier;
@@ -11,6 +12,7 @@ using FileUtils::IFileObserverSubject;
 using FileUtils::IFileObserver;
 using BackupManagement::IFileBackupQueue;
 using BackupManagement::IBackupManager;
+using BackupManagement::IFileBackupPlugin;
 using HotBackup::ILogger;
 
 namespace HotBackup
@@ -23,6 +25,7 @@ namespace HotBackup
 
         static std::shared_ptr<IFileBackupQueue> create_file_backup_queue();
         static std::shared_ptr<IBackupManager> create_backup_manager();
+        static std::shared_ptr<IFileBackupPlugin> create_deleter_plugin();
 
         static std::shared_ptr<ILogger> create_logger();
     };

@@ -32,7 +32,7 @@ void BackupManager::init(
     {
         std::filesystem::create_directory(backupDirectory);
     }
-    
+
     m_queue = backupQueue;
     m_backupDirectory = backupDirectory;
     m_logger = logger;
@@ -40,6 +40,10 @@ void BackupManager::init(
 
 void BackupManager::add_plugin(std::shared_ptr<IFileBackupPlugin> plugin)
 {
+    if (m_shutdown || m_workers.size())
+        throw std::runtime_error("Cannot add plugins while worker threads are running.");
+
+    plugin->init(m_logger, m_backupDirectory);
     m_plugins.push_back(plugin);
 }
 
@@ -104,6 +108,9 @@ void BackupManager::stop_workers()
         if (worker.joinable())
             worker.join();
     }
+
+    m_workers.resize(0);
+    m_shutdown = false;
 }
 
 void BackupManager::backup_file(const std::filesystem::path& sourceFile)

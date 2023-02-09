@@ -3,29 +3,30 @@
 
 #include <vector>
 #include <string>
-#include "../logger.h"
+#include <mutex>
+#include "../ilogger.h"
 
-using HotBackup::Logger;
+using HotBackup::ILogger;
 
 namespace HotBackup_Mocks
 {
-    class ILogger_Mock : public Logger
+    class ILogger_Mock : public ILogger
     {
     public:
         virtual ~ILogger_Mock()
         {
-
         }
 
         void init(const std::filesystem::path& logfilePath) override
         {
-
         }
 
         void log(const std::string logMessage) override
         {
-            auto logMsg { this->create_logmessage_prefix() + " " + logMessage };
-            m_loggedMsgs.push_back(logMsg);
+            {
+                std::unique_lock lock(m_mutex);
+                m_loggedMsgs.push_back(logMessage);
+            }
         }
 
         std::vector<std::string> get_logged_messages()
@@ -35,6 +36,7 @@ namespace HotBackup_Mocks
 
     private:
         std::vector<std::string> m_loggedMsgs;
+        std::mutex m_mutex;
     };
 }
 

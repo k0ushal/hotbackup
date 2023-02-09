@@ -4,6 +4,7 @@
 #include "linux/file_observer_subject.h"
 #include "file_backup_queue.h"
 #include "backup_manager.h"
+#include "file_deleter_plugin.h"
 #include "logger.h"
 
 using HotBackup::HotBackupFactory;
@@ -12,6 +13,7 @@ using HotBackup::Logger;
 using FileUtils::FileObserver;
 using FileUtils::FileObserverSubject;
 using BackupManagement::BackupManager;
+using BackupManagement::FileDeleterPlugin;
 
 std::shared_ptr<IFileObserver<int>> HotBackupFactory::create_file_observer(
     int pollTimeoutInMs
@@ -38,4 +40,9 @@ std::shared_ptr<ILogger> HotBackupFactory::create_logger()
 std::shared_ptr<IBackupManager> HotBackupFactory::create_backup_manager()
 {
     return std::make_shared<BackupManager>();
+}
+
+std::shared_ptr<IFileBackupPlugin> HotBackupFactory::create_deleter_plugin()
+{
+    return std::make_shared<FileDeleterPlugin>();
 }
