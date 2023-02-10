@@ -18,13 +18,10 @@ void FileBackupQueue::push_item(const std::filesystem::path& filePath)
         return;
 
     if (std::filesystem::is_directory(filePath))
-    {
-        std::ostringstream msg;
-        msg << "Input arg (" << filePath << ") is a directory which is not supported";
-        throw std::runtime_error(msg.str().c_str());
-    }
+        return;
 
-    auto fPath { std::filesystem::canonical(filePath) };
+    // auto fPath { std::filesystem::canonical(filePath) };
+    auto fPath { filePath };
 
     {
         std::unique_lock lock(m_mutex);

@@ -34,6 +34,11 @@ namespace HotBackup_Mocks
             return m_loggedMsgs;
         }
 
+        void clear_logs()
+        {
+            m_loggedMsgs.clear();
+        }
+
     private:
         std::vector<std::string> m_loggedMsgs;
         std::mutex m_mutex;

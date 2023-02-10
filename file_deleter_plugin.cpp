@@ -28,7 +28,7 @@ void FileDeleterPlugin::init(
 std::tuple<std::string, std::string> FileDeleterPlugin::get_filename_and_deletion_time(
             const std::filesystem::path& sourceFilePath)
 {
-    auto srcFilename { sourceFilePath.stem().u8string() };
+    auto srcFilename { sourceFilePath.filename().u8string() };
     auto deletePrefixRegex { std::regex(R"(delete_(.*))") };
     auto isoDatePrefix { std::regex(R"(([0-9]{4}\-[0-9]{2}\-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z)_(.*))") };
 
@@ -38,18 +38,18 @@ std::tuple<std::string, std::string> FileDeleterPlugin::get_filename_and_deletio
     if (!ret)
         throw std::runtime_error("delete prefix not found in filename");
 
-    auto filename { match[1].str() };
+    auto isoTimestampAndfilename { match[1].str() };
 
     std::string timestamp;
     std::smatch matchIsoDate;
-    ret = std::regex_match(filename, matchIsoDate, isoDatePrefix);
+    ret = std::regex_match(isoTimestampAndfilename, matchIsoDate, isoDatePrefix);
     if (ret)
     {
         timestamp = matchIsoDate[1];
-        filename = matchIsoDate[2];
+        isoTimestampAndfilename = matchIsoDate[2];
     }
 
-    return { filename, timestamp };
+    return { isoTimestampAndfilename, timestamp };
 }
 
 void FileDeleterPlugin::execute(
@@ -62,25 +62,24 @@ void FileDeleterPlugin::execute(
     if (0 != path.filename().u8string().find(m_deleteFilePrefix))
         return;
 
+    //  Cease further execution of backup plugins.
+    continueExecutingOtherPlugins = false;
+
     //  Parse file name and extract iso timestamp and actual file name.
     auto [filename, deletionTime] = get_filename_and_deletion_time(path);
 
     std::ostringstream msg;
+    auto backupFilePath { m_backupDirectory / (filename + ".bak") };
 
     //  Delete immediately.
     if (deletionTime.empty())
     {
-        auto delSourceFile { std::filesystem::remove(path) };
+        auto delSourceFile { delete_file(path) && delete_file(backupFilePath) };
         if (!delSourceFile)
-        {
-            msg << "FAILED";
-        }
+            msg << "FAILED delete (" << filename << ")";
         else
-        {
-            msg << "SUCCEEDED";
-        }
+            msg << "deleted (" << filename << ")";
 
-        msg << " :: delete (" << path.filename() << ")";
         m_logger->log(msg.str());
         return;
     }
@@ -91,47 +90,50 @@ void FileDeleterPlugin::execute(
     filesToDelete.push_back(m_backupDirectory / (filename + ".bak"));
 
     schedule_files_for_deletion(filesToDelete, deletionTime);
-
-    //  Cease further execution of backup plugins.
-    continueExecutingOtherPlugins = false;
 }
 
 void FileDeleterPlugin::schedule_files_for_deletion(
-    std::vector<std::filesystem::path> filepaths,
+    std::vector<std::filesystem::path> files,
     std::string isoTimestamp)
 {
-    auto waitingTimeInMilliseconds { get_waiting_time_before_deletion(isoTimestamp) };
 
-    auto threadFunc { [&]() {
+    auto threadFunc { [this](std::vector<std::filesystem::path> filepaths, std::string isoTimestamp) {
+
+        //  Log entry
+        std::ostringstream msg;
+        std::string tBuff { filepaths[0].filename().u8string() };
+        std::string sourceFileName (
+            tBuff.begin() + (m_deleteFilePrefix.length() + isoTimestamp.length() + 1),
+            tBuff.end());
+
+        msg << "scheduled delete (" << sourceFileName << ") on " << isoTimestamp;
+        m_logger->log(msg.str());
+
+        //  Put the thread on wait until timestamp
+        auto waitingTimeInSeconds { get_waiting_time_before_deletion(isoTimestamp) };
 
         std::unique_lock lock(m_scheduledDeletionThreadsMutex);
-        m_scheduledDeletionThreadsCondVar.wait_for(lock, waitingTimeInMilliseconds, [&] {
+        m_scheduledDeletionThreadsCondVar.wait_for(lock, waitingTimeInSeconds, [&] {
             return (true == m_shutdown);
         });
 
         if (m_shutdown)
             return;
 
-        //  Delete files.
-        for (auto& file : filepaths)
-        {
-            std::ostringstream msg;
-            auto ret { std::filesystem::remove(file) };
-            if (ret)
-            {
-                msg << "FAILED";
-            }
-            else
-            {
-                msg << "SUCCEEDED";
-            }
+        msg.str("");
+        msg.clear();
 
-            msg << " :: delete (" << file.filename() << ")";
-            m_logger->log(msg.str());
-        }
+        //  Delete files.
+        auto ret { delete_file(filepaths[0]) && delete_file(filepaths[1]) };
+        if (!ret)
+            msg << "failed delete (" << sourceFileName << ")";
+        else
+            msg << "deleted (" << sourceFileName << ")";
+
+        m_logger->log(msg.str());
     }};
 
-    std::future<void> future { std::async(threadFunc) };
+    std::future<void> future { std::async(threadFunc, files, isoTimestamp) };
     m_scheduledDeletionFutures.push_back(std::move(future));
 }
 
@@ -171,7 +173,11 @@ void FileDeleterPlugin::shutdown()
     m_scheduledDeletionThreadsCondVar.notify_all();
 
     for (auto& future : m_scheduledDeletionFutures)
-    {
-        future.get();
-    }
+        future.wait();
+}
+
+bool FileDeleterPlugin::delete_file(
+    const std::filesystem::path& filepath)
+{
+    return std::filesystem::remove(filepath);
 }

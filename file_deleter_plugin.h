@@ -43,6 +43,8 @@ namespace BackupManagement
         virtual std::chrono::seconds get_waiting_time_before_deletion(
             std::string isoTimestamp);
 
+        virtual bool delete_file(const std::filesystem::path& filepath);
+
     private:
         std::shared_ptr<ILogger> m_logger;
         const std::string m_deleteFilePrefix { "delete_" };

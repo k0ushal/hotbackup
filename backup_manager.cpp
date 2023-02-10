@@ -1,4 +1,5 @@
 
+#include <iostream>
 #include <sstream>
 #include <algorithm>
 #include "backup_manager.h"
@@ -56,39 +57,46 @@ void BackupManager::start_workers(unsigned workerCount)
 
         while (!m_shutdown)
         {
-            std::filesystem::path queueItem;
-
-            //  Critical section block to pull an item
-            //  out of the queue.
+            try
             {
-                // std::unique_lock lock(m_mutex);
-                // m_condVar.wait(lock, [&] {
-                //     return (m_shutdown);
-                // });
+                std::filesystem::path queueItem;
 
-                if (m_shutdown)
-                    break;
+                //  Critical section block to pull an item
+                //  out of the queue.
+                {
+                    // std::unique_lock lock(m_mutex);
+                    // m_condVar.wait(lock, [&] {
+                    //     return (m_shutdown);
+                    // });
 
-                queueItem = m_queue->get_next_item(-1);
-                if (queueItem.empty())
-                    continue;
-            }
+                    if (m_shutdown)
+                        break;
 
-            bool continueExecutingOtherPlugins { true };
+                    queueItem = m_queue->get_next_item(-1);
+                    if (queueItem.empty())
+                        continue;
+                }
 
-            //  process the item through plugins
-            for (auto& plugin : m_plugins)
-            {
-                plugin->execute(queueItem, continueExecutingOtherPlugins);
+                bool continueExecutingOtherPlugins { true };
+
+                //  process the item through plugins
+                for (auto& plugin : m_plugins)
+                {
+                    plugin->execute(queueItem, continueExecutingOtherPlugins);
+                    if (not continueExecutingOtherPlugins)
+                        break;
+                }
+
                 if (not continueExecutingOtherPlugins)
-                    break;
+                    continue;
+
+                //  backup the file
+                backup_file(queueItem);
             }
-
-            if (not continueExecutingOtherPlugins)
-                continue;
-
-            //  backup the file
-            backup_file(queueItem);
+            catch (const std::exception& e)
+            {
+                std::cerr << e.what() << std::endl;
+            }
         }
     }};
 
@@ -126,7 +134,7 @@ void BackupManager::backup_file(const std::filesystem::path& sourceFile)
     auto backupFilePath { m_backupDirectory / sourceFile.filename() };
     backupFilePath += std::string(".bak");
 
-    auto ret { std::filesystem::copy_file(sourceFile, backupFilePath) };
+    auto ret { std::filesystem::copy_file(sourceFile, backupFilePath, std::filesystem::copy_options::overwrite_existing) };
     if (not ret)
     {
         //  write log
@@ -139,6 +147,6 @@ void BackupManager::backup_file(const std::filesystem::path& sourceFile)
         throw std::runtime_error(msg.str().c_str());
     }
 
-    msg << "SUCCESS:: backed up file (" << sourceFile << ")";
+    msg << "backedup (" << sourceFile << ")";
     m_logger->log(msg.str());
 }

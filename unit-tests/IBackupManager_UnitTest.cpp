@@ -103,7 +103,7 @@ namespace HotBackup_UnitTests
         sleep(3);
 
         //  Extract filenames from log messages.
-        std::regex pattern { "SUCCESS:: backed up file \\(\"/tmp/testing/([a-z]+)\"\\)" };
+        std::regex pattern { "backedup \\(\"/tmp/testing/([a-z]+)\"\\)" };
         std::smatch match;
         std::set<std::string> backedUpFiles;
 

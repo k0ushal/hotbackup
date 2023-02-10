@@ -1,4 +1,7 @@
 
+#ifndef _HOTBACKUP_FACTORY_H_
+#define _HOTBACKUP_FACTORY_H_
+
 #include <memory>
 #include "ifile_observer.h"
 #include "ifile_observer_subject.h"
@@ -30,3 +33,5 @@ namespace HotBackup
         static std::shared_ptr<ILogger> create_logger();
     };
 }
+
+#endif  //  _HOTBACKUP_FACTORY_H_

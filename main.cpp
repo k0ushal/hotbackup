@@ -11,22 +11,18 @@
 #include "ifile_observer_subject.h"
 #include "hotbackup_factory.h"
 #include "ilogger.h"
+#include "HotBackupApp.h"
 
 using FileUtils::ISubject;
 using FileUtils::IFileObserver;
 using FileUtils::IFileObserverSubject;
 using FileUtils::FileEvents;
 using HotBackup::HotBackupFactory;
+using HotBackup::HotBackupApp;
 using HotBackup::ILogger;
 
 int main(int argc, char* argv[])
 {
-    #if 0
-    auto logger { HotBackupFactory::create_logger() };
-    logger->log("hello");
-    return 0;
-    #endif
-
     if (argc < 3)
     {
         std::cout << "Usage:" << std::endl;
@@ -34,45 +30,16 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    const int infinitePolling { -1 };
     std::filesystem::path hotDirectory(argv[1]);
     std::filesystem::path backupDirectory(argv[2]);
 
-    std::cout << "Hot dir: " << hotDirectory.c_str() << ": " <<
-        (std::filesystem::exists(hotDirectory) ? "Valid" : "Invalid") << std::endl;
-
-    std::cout << "Backup dir: " << backupDirectory << std::endl;
+    HotBackupApp app(hotDirectory, backupDirectory);
 
     try
     {
-        auto fileObserverSubject { HotBackupFactory::create_file_observer_subject("file-notifier") };
-        auto fileObserver { HotBackupFactory::create_file_observer(infinitePolling) };
-
-        fileObserverSubject->add_file(hotDirectory);
-
-        fileObserver->add_subject(fileObserverSubject);
-
-        std::function<bool(std::filesystem::path, FileEvents)> printChangedFiles = 
-        [&](std::filesystem::path filePath, FileEvents events) -> bool {
-
-            std::vector<std::string> eventNames { "Created", "Modified" };
-
-            std::cout << eventNames[(int)events] << ": " << filePath << std::endl;
-
-            return true;
-        };
-
-        auto watcherFunc = [&](std::shared_ptr<ISubject<int>> subject) -> bool {
-
-            if (fileObserverSubject == subject)
-            {
-                fileObserverSubject->get_changed_files_list(printChangedFiles);
-            }
-
-            return true;
-        };
-
-        fileObserver->start_observer(watcherFunc);
+        app.init();
+        app.start_backup_workers();
+        app.start_directory_listeners();
 
         while (true)
         {
@@ -83,10 +50,11 @@ int main(int argc, char* argv[])
             if (0 == input.find("exit"))
             {
                 std::cout << "Terminating..." << std::endl;
-                fileObserver->stop_observer();
                 break;
             }
         }
+
+        app.shutdown();
     }
     catch (const std::exception& e)
     {

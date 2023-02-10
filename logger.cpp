@@ -15,7 +15,7 @@ Logger::~Logger()
 
 void Logger::init(const std::filesystem::path& logfilePath)
 {
-    if (not std::filesystem::exists(logfilePath) || std::filesystem::is_directory(logfilePath))
+    if (std::filesystem::is_directory(logfilePath))
     {
         std::ostringstream msg;
         msg << "Invalid log file path (" << logfilePath << ")";

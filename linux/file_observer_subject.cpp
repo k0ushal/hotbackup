@@ -34,7 +34,7 @@ void FileObserverSubject::add_file(const std::filesystem::path& targetFile)
     if (m_filepathToWatchIndex.count(filePath.u8string()) > 0)
         return;
 
-    int wd = inotify_add_watch(m_notifyFd, filePath.c_str(), IN_MODIFY | IN_CREATE);
+    int wd = inotify_add_watch(m_notifyFd, filePath.c_str(), IN_MODIFY | IN_CREATE | IN_MOVED_TO);
     if (-1 == wd)
     {
         std::ostringstream msg;
@@ -115,7 +115,7 @@ void FileObserverSubject::get_changed_files_list(
             if (pEvt->len)
                 filePath /= pEvt->name;
 
-            if (IN_MODIFY & pEvt->mask)
+            if (IN_MODIFY & pEvt->mask || IN_MOVED_TO & pEvt->mask)
                 event = FileEvents::FE_MODIFIED;
             else if (IN_CREATE & pEvt->mask)
                 event = FileEvents::FE_CREATED;
