@@ -20,7 +20,7 @@ cp /usr/local/libgtest*.a /usr/local/lib/
 
 # Build instructions
 ```
-git clone git@github.com:k0ushal/nordvpn-assignment.git
+git clone https://github.com/k0ushal/hotbackup.git
 cd nordvpn-assignment
 make        # Builds the main binary (hotbackup)
 make tests  # Builds unit tests (tests)
