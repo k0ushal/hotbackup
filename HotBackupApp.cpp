@@ -57,7 +57,6 @@ void HotBackupApp::start_directory_listeners()
 
         msg << eventNames[(int)events] << " :: " << filePath.filename() << std::endl;
         m_logger->log(msg.str());
-        std::cout << msg.str() << std::endl;
 
         m_queue->push_item(filePath);
         return true;

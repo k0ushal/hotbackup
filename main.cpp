@@ -33,17 +33,17 @@ int main(int argc, char* argv[])
     std::filesystem::path hotDirectory(argv[1]);
     std::filesystem::path backupDirectory(argv[2]);
 
-    HotBackupApp app(hotDirectory, backupDirectory);
-
     try
     {
+        HotBackupApp app(hotDirectory, backupDirectory);
+
         app.init();
         app.start_backup_workers();
         app.start_directory_listeners();
 
         while (true)
         {
-            std::cout << "Waiting for input" << std::endl;
+            std::cout << "Type [exit] to terminate" << std::endl;
             std::string input;
             std::cin >> input;
 

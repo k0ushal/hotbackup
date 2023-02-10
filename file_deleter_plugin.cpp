@@ -124,11 +124,10 @@ void FileDeleterPlugin::schedule_files_for_deletion(
         msg.clear();
 
         //  Delete files.
-        auto ret { delete_file(filepaths[0]) && delete_file(filepaths[1]) };
-        if (!ret)
-            msg << "failed delete (" << sourceFileName << ")";
-        else
-            msg << "deleted (" << sourceFileName << ")";
+        delete_file(filepaths[0]);
+        delete_file(filepaths[1]);
+
+        msg << "deleted (" << sourceFileName << ")";
 
         m_logger->log(msg.str());
     }};
