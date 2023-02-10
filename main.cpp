@@ -6,11 +6,11 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/inotify.h>
-#include "isubject.h"
-#include "ifile_observer.h"
-#include "ifile_observer_subject.h"
+#include "interfaces/isubject.h"
+#include "interfaces/ifile_observer.h"
+#include "interfaces/ifile_observer_subject.h"
+#include "interfaces/ilogger.h"
 #include "hotbackup_factory.h"
-#include "ilogger.h"
 #include "HotBackupApp.h"
 
 using FileUtils::ISubject;

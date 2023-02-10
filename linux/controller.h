@@ -2,7 +2,7 @@
 #define _CONTROLLER_H_
 
 #include <string>
-#include "../isubject.h"
+#include "../interfaces/isubject.h"
 
 using FileUtils::ISubject;
 

@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 #include <sys/inotify.h>
-#include "../isubject.h"
-#include "../ifile_notifier.h"
-#include "../ifile_observer_subject.h"
+#include "../interfaces/isubject.h"
+#include "../interfaces/ifile_notifier.h"
+#include "../interfaces/ifile_observer_subject.h"
 
 namespace FileUtils
 {

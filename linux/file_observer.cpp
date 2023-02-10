@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <exception>
 #include <functional>
-#include "../isubject.h"
+#include "../interfaces/isubject.h"
 #include "file_observer.h"
 #include "controller.h"
 

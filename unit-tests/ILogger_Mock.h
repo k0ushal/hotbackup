@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <mutex>
-#include "../ilogger.h"
+#include "../interfaces/ilogger.h"
 
 using HotBackup::ILogger;
 

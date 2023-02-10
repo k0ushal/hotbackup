@@ -6,8 +6,8 @@
 #include <thread>
 #include <atomic>
 #include <condition_variable>
-#include "ibackup_manager.h"
-#include "ifile_backup_queue_consumer.h"
+#include "interfaces/ibackup_manager.h"
+#include "interfaces/ifile_backup_queue_consumer.h"
 
 namespace BackupManagement
 {

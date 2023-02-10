@@ -7,8 +7,8 @@
 #include <memory>
 #include <atomic>
 #include "hotbackup_factory.h"
-#include "ilogger.h"
-#include "ifile_backup_plugin.h"
+#include "interfaces/ilogger.h"
+#include "interfaces/ifile_backup_plugin.h"
 
 using HotBackup::ILogger;
 using BackupManagement::IFileBackupPlugin;

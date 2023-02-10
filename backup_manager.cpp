@@ -3,8 +3,8 @@
 #include <sstream>
 #include <algorithm>
 #include "backup_manager.h"
-#include "ifile_backup_queue.h"
-#include "ilogger.h"
+#include "interfaces/ifile_backup_queue.h"
+#include "interfaces/ilogger.h"
 
 using BackupManagement::BackupManager;
 using BackupManagement::IFileBackupQueueConsumer;

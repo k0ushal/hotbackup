@@ -3,9 +3,9 @@
 #include <exception>
 #include <filesystem>
 #include "HotBackupApp.h"
-#include "ifile_backup_queue.h"
+#include "interfaces/ifile_backup_queue.h"
+#include "interfaces/ifile_notifier.h"
 #include "hotbackup_factory.h"
-#include "ifile_notifier.h"
 
 using HotBackup::HotBackupApp;
 using HotBackup::HotBackupFactory;

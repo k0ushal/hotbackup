@@ -4,9 +4,9 @@
 #include <string>
 #include <sstream>
 #include <regex>
-#include "../ibackup_manager.h"
+#include "../interfaces/ibackup_manager.h"
+#include "../interfaces/ilogger.h"
 #include "../hotbackup_factory.h"
-#include "../ilogger.h"
 #include "ILogger_Mock.h"
 
 using HotBackup::HotBackupFactory;

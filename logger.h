@@ -3,7 +3,7 @@
 #include <fstream>
 #include <string>
 #include <mutex>
-#include "ilogger.h"
+#include "interfaces/ilogger.h"
 
 namespace HotBackup
 {

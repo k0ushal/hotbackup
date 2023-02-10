@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include "../ifile_backup_queue.h"
+#include "../interfaces/ifile_backup_queue.h"
 #include "../hotbackup_factory.h"
 
 using HotBackup::HotBackupFactory;

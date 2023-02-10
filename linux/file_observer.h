@@ -9,8 +9,8 @@
 #include <thread>
 #include <poll.h>
 #include <atomic>
-#include "../isubject.h"
-#include "../ifile_observer.h"
+#include "../interfaces/isubject.h"
+#include "../interfaces/ifile_observer.h"
 #include "controller.h"
 
 namespace FileUtils

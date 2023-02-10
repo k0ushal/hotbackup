@@ -3,12 +3,12 @@
 #define _HOTBACKUP_FACTORY_H_
 
 #include <memory>
-#include "ifile_observer.h"
-#include "ifile_observer_subject.h"
-#include "ifile_backup_queue.h"
-#include "ibackup_manager.h"
-#include "ifile_backup_plugin.h"
-#include "ilogger.h"
+#include "interfaces/ifile_observer.h"
+#include "interfaces/ifile_observer_subject.h"
+#include "interfaces/ifile_backup_queue.h"
+#include "interfaces/ibackup_manager.h"
+#include "interfaces/ifile_backup_plugin.h"
+#include "interfaces/ilogger.h"
 
 using FileUtils::IFileNotifier;
 using FileUtils::IFileObserverSubject;
