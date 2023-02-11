@@ -10,12 +10,19 @@ namespace HotBackup
     class Logger : public ILogger
     {
     public:
-        Logger();
-        virtual ~Logger();
+        Logger(const Logger&) = delete;
+        Logger& operator =(const Logger&) = delete;
+        Logger(Logger&&) = delete;
+        Logger& operator =(Logger&&) = delete;
+
+        Logger() = default;
+        virtual ~Logger() = default;
+
+    public:
         virtual void init(const std::filesystem::path& logfilePath) override;
         virtual void log(const std::string logMessage) override;
 
-    // protected:
+    protected:
         virtual std::string create_logmessage_prefix();
         virtual std::string get_current_timestamp();
 

@@ -11,8 +11,9 @@ namespace FileUtils
     class IFileObserver
     {
     public:
-        virtual ~IFileObserver() {}
+        virtual ~IFileObserver() = default;
 
+    public:
         virtual void add_subject(std::shared_ptr<ISubject<T>> target) = 0;
 
         //  This is a blocking call. The class spawns a separate thread

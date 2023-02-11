@@ -5,14 +5,6 @@
 
 using HotBackup::Logger;
 
-Logger::Logger()
-{
-}
-
-Logger::~Logger()
-{
-}
-
 void Logger::init(const std::filesystem::path& logfilePath)
 {
     if (std::filesystem::is_directory(logfilePath))

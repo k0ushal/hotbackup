@@ -14,9 +14,15 @@ namespace BackupManagement
     class BackupManager : public IBackupManager
     {
     public:
-        BackupManager();
-        virtual ~BackupManager();
+        BackupManager(const BackupManager&) = delete;
+        BackupManager& operator =(const BackupManager&) = delete;
+        BackupManager(BackupManager&&) = delete;
+        BackupManager& operator =(BackupManager&&) = delete;
 
+        BackupManager() = default;
+        virtual ~BackupManager() = default;
+
+    public:
         virtual void init(
             const std::filesystem::path& backupDirectory,
             std::shared_ptr<IFileBackupQueueConsumer> backupQueue,
@@ -25,6 +31,7 @@ namespace BackupManagement
         virtual void add_plugin(std::shared_ptr<IFileBackupPlugin> plugin) override;
 
         virtual void start_workers(unsigned workerCount) override;
+
         virtual void stop_workers() override;
 
     protected:
@@ -37,8 +44,6 @@ namespace BackupManagement
         std::shared_ptr<ILogger> m_logger;
         std::filesystem::path m_backupDirectory;
         std::atomic_bool m_shutdown { false };
-        // std::mutex m_mutex;
-        // std::condition_variable m_condVar;
     };
 }
 

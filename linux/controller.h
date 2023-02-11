@@ -18,8 +18,14 @@ namespace FileUtils
     class Controller : public ISubject<int>
     {
     public:
+        Controller(const Controller&) = delete;
+        Controller& operator =(const Controller&) = delete;
+        Controller(Controller&&) = delete;
+        Controller& operator =(Controller&&) = delete;
+
+    public:
         Controller();
-        ~Controller();
+        virtual ~Controller();
 
         void signal_event(const std::string& eventMsg);
         std::string read_event();

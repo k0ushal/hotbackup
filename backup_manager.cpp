@@ -10,14 +10,6 @@ using BackupManagement::BackupManager;
 using BackupManagement::IFileBackupQueueConsumer;
 using HotBackup::ILogger;
 
-BackupManager::BackupManager()
-{
-}
-
-BackupManager::~BackupManager()
-{
-}
-
 void BackupManager::init(
     const std::filesystem::path& backupDirectory,
     std::shared_ptr<IFileBackupQueueConsumer> backupQueue,
@@ -61,21 +53,11 @@ void BackupManager::start_workers(unsigned workerCount)
             {
                 std::filesystem::path queueItem;
 
-                //  Critical section block to pull an item
-                //  out of the queue.
-                {
-                    // std::unique_lock lock(m_mutex);
-                    // m_condVar.wait(lock, [&] {
-                    //     return (m_shutdown);
-                    // });
-
-                    if (m_shutdown)
-                        break;
-
-                    queueItem = m_queue->get_next_item(-1);
-                    if (queueItem.empty())
-                        continue;
-                }
+                //  Queue itself is re-entrant and shutdown aware.
+                //  No need for synchronization here.
+                queueItem = m_queue->get_next_item(-1);
+                if (queueItem.empty())
+                    continue;
 
                 bool continueExecutingOtherPlugins { true };
 

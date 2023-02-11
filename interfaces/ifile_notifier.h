@@ -25,8 +25,9 @@ namespace FileUtils
     class IFileNotifier
     {
     public:
-        virtual ~IFileNotifier() {}
+        virtual ~IFileNotifier() = default;
 
+    public:
         //  IFileNotifier methods
         virtual void add_file(const std::filesystem::path& targetFile) = 0;
         virtual void remove_file(const std::filesystem::path& targetFile) = 0;

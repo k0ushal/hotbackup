@@ -64,6 +64,8 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "bit": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "any": "cpp",
+        "variant": "cpp"
     }
 }

@@ -24,8 +24,14 @@ namespace HotBackup
     class FileBackupQueue : public IFileBackupQueue
     {
     public:
-        FileBackupQueue();
+        FileBackupQueue(const FileBackupQueue&) = delete;
+        FileBackupQueue& operator =(const FileBackupQueue&) = delete;
+        FileBackupQueue(FileBackupQueue&&) = delete;
+        FileBackupQueue& operator =(FileBackupQueue&&) = delete;
 
+        FileBackupQueue() = default;
+
+    public:
         virtual ~FileBackupQueue();
 
         //  IFileBackupQueueProducer methods (inherited)

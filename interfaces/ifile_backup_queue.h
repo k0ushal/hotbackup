@@ -11,6 +11,9 @@ namespace BackupManagement
     class IFileBackupQueue : public IFileBackupQueueProducer, public IFileBackupQueueConsumer
     {
     public:
+        virtual ~IFileBackupQueue() = default;
+
+    public:
         //  IFileBackupQueueProducer methods (inherited)
         virtual void push_item(const std::filesystem::path& filePath) = 0;
 

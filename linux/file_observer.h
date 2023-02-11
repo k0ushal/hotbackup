@@ -18,6 +18,12 @@ namespace FileUtils
     class FileObserver : public IFileObserver<int>
     {
     public:
+        FileObserver(const FileObserver&) = delete;
+        FileObserver& operator =(const FileObserver&) = delete;
+        FileObserver(FileObserver&&) = delete;
+        FileObserver& operator =(FileObserver&&) = delete;
+
+    public:
         //  pollDurationInMs < 0 means the poll timeout
         //  is set to infinite.
         FileObserver(int pollTimeoutInMs = 5000);

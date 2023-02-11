@@ -18,8 +18,15 @@ namespace HotBackup
     class HotBackupApp
     {
     public:
+        HotBackupApp(const HotBackupApp&) = delete;
+        HotBackupApp& operator =(const HotBackupApp&) = delete;
+        HotBackupApp(HotBackupApp&&) = delete;
+        HotBackupApp& operator =(HotBackupApp&&) = delete;
+
+        virtual ~HotBackupApp() = default;
+
+    public:
         HotBackupApp(const std::filesystem::path& hotDirectory, std::filesystem::path backupDirectory);
-        ~HotBackupApp();
 
         void init();
         void start_directory_listeners();

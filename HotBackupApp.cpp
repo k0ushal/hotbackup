@@ -26,10 +26,6 @@ HotBackupApp::HotBackupApp(
         throw std::runtime_error("Error creating backup directory");
 }
 
-HotBackupApp::~HotBackupApp()
-{
-}
-
 void HotBackupApp::init()
 {
     m_logger = HotBackupFactory::create_logger();
@@ -93,6 +89,5 @@ void HotBackupApp::shutdown()
 {
     m_shutdown = true;
     m_fileObserver->stop_observer();
-
     m_backupManager->stop_workers();
 }

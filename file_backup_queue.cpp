@@ -3,10 +3,6 @@
 
 using HotBackup::FileBackupQueue;
 
-FileBackupQueue::FileBackupQueue()
-{
-}
-
 FileBackupQueue::~FileBackupQueue()
 {
     shutdown();

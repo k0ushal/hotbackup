@@ -12,6 +12,12 @@ namespace FileUtils
     class FileObserverSubject : public IFileObserverSubject<int>
     {
     public:
+        FileObserverSubject(const FileObserverSubject&) = delete;
+        FileObserverSubject& operator =(const FileObserverSubject&) = delete;
+        FileObserverSubject(FileObserverSubject&&) = delete;
+        FileObserverSubject& operator =(FileObserverSubject&&) = delete;
+
+    public:
         FileObserverSubject(std::string name);
         virtual ~FileObserverSubject();
 

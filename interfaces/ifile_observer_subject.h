@@ -12,6 +12,9 @@ namespace FileUtils
     class IFileObserverSubject : public IFileNotifier, public ISubject<T>
     {
     public:
+        virtual ~IFileObserverSubject() = default;
+
+    public:
         //  IFileNotifier methods (inherited)
         virtual void add_file(const std::filesystem::path& targetFile) = 0;
         virtual void remove_file(const std::filesystem::path& targetFile) = 0;

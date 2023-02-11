@@ -16,6 +16,9 @@ namespace BackupManagement
     class IBackupManager
     {
     public:
+        virtual ~IBackupManager() = default;
+
+    public:
         virtual void init(
             const std::filesystem::path& backupDirectory,
             std::shared_ptr<IFileBackupQueueConsumer> backupQueue,

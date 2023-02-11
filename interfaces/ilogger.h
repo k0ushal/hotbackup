@@ -10,7 +10,9 @@ namespace HotBackup
     class ILogger
     {
     public:
-        virtual ~ILogger() {}
+        virtual ~ILogger() = default;
+
+    public:
         virtual void init(const std::filesystem::path& logfilePath) = 0;
         virtual void log(const std::string logMessage) = 0;
     };
