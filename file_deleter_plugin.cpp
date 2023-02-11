@@ -30,7 +30,6 @@ std::tuple<std::string, std::string> FileDeleterPlugin::get_filename_and_deletio
 {
     auto srcFilename { sourceFilePath.filename().u8string() };
     auto deletePrefixRegex { std::regex(R"(delete_(.*))") };
-    auto isoDatePrefix { std::regex(R"(([0-9]{4}\-[0-9]{2}\-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z)_(.*))") };
 
     //  Discard delete_ prefix
     std::smatch match;
@@ -40,9 +39,11 @@ std::tuple<std::string, std::string> FileDeleterPlugin::get_filename_and_deletio
 
     auto isoTimestampAndfilename { match[1].str() };
 
+    //  Check for and extract ISO timestamp
     std::string timestamp;
     std::smatch matchIsoDate;
-    ret = std::regex_match(isoTimestampAndfilename, matchIsoDate, isoDatePrefix);
+    auto isoDatePrefixRegex { std::regex(R"(([0-9]{4}\-[0-9]{2}\-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z)_(.*))") };
+    ret = std::regex_match(isoTimestampAndfilename, matchIsoDate, isoDatePrefixRegex);
     if (ret)
     {
         timestamp = matchIsoDate[1];
@@ -56,6 +57,7 @@ void FileDeleterPlugin::execute(
     const std::filesystem::path& path,
     bool& continueExecutingOtherPlugins)
 {
+    std::ostringstream msg;
     continueExecutingOtherPlugins = true;
 
     //  Check for delete_ prefix in file name
@@ -68,10 +70,9 @@ void FileDeleterPlugin::execute(
     //  Parse file name and extract iso timestamp and actual file name.
     auto [filename, deletionTime] = get_filename_and_deletion_time(path);
 
-    std::ostringstream msg;
     auto backupFilePath { m_backupDirectory / (filename + ".bak") };
 
-    //  Delete immediately.
+    //  No ISO timestamp: Delete immediately.
     if (deletionTime.empty())
     {
         auto delSourceFile { delete_file(path) && delete_file(backupFilePath) };
@@ -84,7 +85,7 @@ void FileDeleterPlugin::execute(
         return;
     }
 
-    //  Delete on ISO timestamp
+    //  Schedule deletion on ISO timestamp
     std::vector<std::filesystem::path> filesToDelete;
     filesToDelete.push_back(path);
     filesToDelete.push_back(m_backupDirectory / (filename + ".bak"));
@@ -96,7 +97,6 @@ void FileDeleterPlugin::schedule_files_for_deletion(
     std::vector<std::filesystem::path> files,
     std::string isoTimestamp)
 {
-
     auto threadFunc { [this](std::vector<std::filesystem::path> filepaths, std::string isoTimestamp) {
 
         //  Log entry
@@ -109,24 +109,25 @@ void FileDeleterPlugin::schedule_files_for_deletion(
         msg << "scheduled delete (" << sourceFileName << ") on " << isoTimestamp;
         m_logger->log(msg.str());
 
-        //  Put the thread on wait until timestamp
-        auto waitingTimeInSeconds { get_waiting_time_before_deletion(isoTimestamp) };
+        //  Put the thread on wait until timestamp. The wait will timeout
+        //  after the set duration and then we execute the delete operation.
+        //  The wait is interruptible by a shutdown request.
+        auto waitingTimeInMilliseconds { get_waiting_time_before_deletion(isoTimestamp) };
 
         std::unique_lock lock(m_scheduledDeletionThreadsMutex);
-        m_scheduledDeletionThreadsCondVar.wait_for(lock, waitingTimeInSeconds, [&] {
+        m_scheduledDeletionThreadsCondVar.wait_for(lock, waitingTimeInMilliseconds, [&] {
             return (true == m_shutdown);
         });
 
         if (m_shutdown)
             return;
 
-        msg.str("");
-        msg.clear();
-
         //  Delete files.
         delete_file(filepaths[0]);
         delete_file(filepaths[1]);
 
+        msg.str("");
+        msg.clear();
         msg << "deleted (" << sourceFileName << ")";
 
         m_logger->log(msg.str());
@@ -136,7 +137,7 @@ void FileDeleterPlugin::schedule_files_for_deletion(
     m_scheduledDeletionFutures.push_back(std::move(future));
 }
 
-std::chrono::seconds FileDeleterPlugin::get_waiting_time_before_deletion(
+std::chrono::milliseconds FileDeleterPlugin::get_waiting_time_before_deletion(
     std::string isoTimestamp)
 {
     struct tm tmTimestamp {};
@@ -158,10 +159,8 @@ std::chrono::seconds FileDeleterPlugin::get_waiting_time_before_deletion(
     tmTimestamp.tm_isdst = 0;
 
     auto timeT { std::mktime(&tmTimestamp) };
-
     auto tPoint { std::chrono::system_clock::from_time_t(timeT) };
-
-    auto diffTime = std::chrono::duration_cast<std::chrono::seconds>(tPoint - std::chrono::system_clock::now());
+    auto diffTime = std::chrono::duration_cast<std::chrono::milliseconds>(tPoint - std::chrono::system_clock::now());
 
     return diffTime;
 }

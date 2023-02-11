@@ -16,6 +16,14 @@ namespace BackupManagement
     class IBackupManager
     {
     public:
+        IBackupManager(const IBackupManager&) = delete;
+        IBackupManager& operator =(const IBackupManager&) = delete;
+        IBackupManager(IBackupManager&&) = delete;
+        IBackupManager& operator =(IBackupManager&&) = delete;
+
+        IBackupManager() {}
+        virtual ~IBackupManager() {}
+
         virtual void init(
             const std::filesystem::path& backupDirectory,
             std::shared_ptr<IFileBackupQueueConsumer> backupQueue,

@@ -12,6 +12,15 @@ namespace BackupManagement
     class IFileBackupPlugin
     {
     public:
+        IFileBackupPlugin(const IFileBackupPlugin&) = delete;
+        IFileBackupPlugin& operator =(const IFileBackupPlugin&) = delete;
+        IFileBackupPlugin(IFileBackupPlugin&&) = delete;
+        IFileBackupPlugin& operator =(IFileBackupPlugin&&) = delete;
+
+        IFileBackupPlugin() {}
+        virtual ~IFileBackupPlugin() {}
+
+    public:
         virtual void init(
             std::shared_ptr<ILogger> logger,
             const std::filesystem::path& backupDirectory) = 0;

@@ -10,13 +10,13 @@ namespace HotBackup_UnitTests
     class IFileDeleterPlugin_Mock : public FileDeleterPlugin
     {
     public:
-        virtual std::tuple<std::string, std::string> process_file_name(
+        virtual std::tuple<std::string, std::string> get_filename_and_deletion_time(
             const std::filesystem::path& filePath)
         {
-            return get_filename_and_deletion_time(filePath);
+            return FileDeleterPlugin::get_filename_and_deletion_time(filePath);
         }
 
-        virtual std::chrono::seconds get_waiting_time_before_deletion(std::string timestamp)
+        virtual std::chrono::milliseconds get_waiting_time_before_deletion(std::string timestamp)
         {
             return FileDeleterPlugin::get_waiting_time_before_deletion(timestamp);
         }

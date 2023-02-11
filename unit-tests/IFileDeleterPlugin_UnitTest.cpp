@@ -45,14 +45,14 @@ namespace HotBackup_UnitTests
 
     TEST_F(IFileDeleterPlugin_UnitTest, SmokeTest)
     {
-        auto [filename, deletionTime] = m_fileDeleterPlugin->process_file_name("/tmp/test/delete_abc.txt");
+        auto [filename, deletionTime] = m_fileDeleterPlugin->get_filename_and_deletion_time("/tmp/test/delete_abc.txt");
         ASSERT_EQ(filename, "abc.txt");
         ASSERT_EQ(deletionTime, "");
     }
 
     TEST_F(IFileDeleterPlugin_UnitTest, Multiple_Extension_Filename)
     {
-        auto [filename, deletionTime] = m_fileDeleterPlugin->process_file_name("/tmp/test/delete_abc.txt.doc");
+        auto [filename, deletionTime] = m_fileDeleterPlugin->get_filename_and_deletion_time("/tmp/test/delete_abc.txt.doc");
         ASSERT_EQ(filename, "abc.txt.doc");
         ASSERT_EQ(deletionTime, "");
     }
@@ -60,7 +60,7 @@ namespace HotBackup_UnitTests
     TEST_F(IFileDeleterPlugin_UnitTest, File_With_ISO_timestamp)
     {
         std::filesystem::path filepath { "/tmp/test/delete_2022-01-21T09:21:00Z_abc.doc" };
-        auto [filename, deletionTime] = m_fileDeleterPlugin->process_file_name(filepath);
+        auto [filename, deletionTime] = m_fileDeleterPlugin->get_filename_and_deletion_time(filepath);
         ASSERT_EQ(filename, "abc.doc");
         ASSERT_EQ(deletionTime, "2022-01-21T09:21:00Z");
     }
@@ -77,7 +77,7 @@ namespace HotBackup_UnitTests
         auto waitingTimeInSeconds { m_fileDeleterPlugin->get_waiting_time_before_deletion(timestamp.str()) };
 
         //  Account for 1 sec tolerance.
-        ASSERT_TRUE(waitingTimeInSeconds.count() >= 316 && waitingTimeInSeconds.count() <= 317);
+        ASSERT_TRUE(waitingTimeInSeconds.count() >= 316000 && waitingTimeInSeconds.count() <= 317000);
     }
 
     TEST_F(IFileDeleterPlugin_UnitTest, Execute_test)

@@ -93,6 +93,5 @@ void HotBackupApp::shutdown()
 {
     m_shutdown = true;
     m_fileObserver->stop_observer();
-
     m_backupManager->stop_workers();
 }

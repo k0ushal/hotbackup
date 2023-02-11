@@ -15,6 +15,7 @@ namespace BackupManagement
     {
     public:
         BackupManager();
+
         virtual ~BackupManager();
 
         virtual void init(
@@ -25,6 +26,7 @@ namespace BackupManagement
         virtual void add_plugin(std::shared_ptr<IFileBackupPlugin> plugin) override;
 
         virtual void start_workers(unsigned workerCount) override;
+
         virtual void stop_workers() override;
 
     protected:
@@ -37,8 +39,6 @@ namespace BackupManagement
         std::shared_ptr<ILogger> m_logger;
         std::filesystem::path m_backupDirectory;
         std::atomic_bool m_shutdown { false };
-        // std::mutex m_mutex;
-        // std::condition_variable m_condVar;
     };
 }
 

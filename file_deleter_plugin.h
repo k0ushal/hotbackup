@@ -40,7 +40,7 @@ namespace BackupManagement
             std::vector<std::filesystem::path> filepaths,
             std::string isoTimestamp);
 
-        virtual std::chrono::seconds get_waiting_time_before_deletion(
+        virtual std::chrono::milliseconds get_waiting_time_before_deletion(
             std::string isoTimestamp);
 
         virtual bool delete_file(const std::filesystem::path& filepath);
