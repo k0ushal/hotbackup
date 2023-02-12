@@ -15,6 +15,7 @@ namespace HotBackup
     public:
         virtual void init(const std::filesystem::path& logfilePath) = 0;
         virtual void log(const std::string logMessage) = 0;
+        virtual void shutdown() = 0;
     };
 }
 

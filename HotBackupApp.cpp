@@ -51,7 +51,7 @@ void HotBackupApp::start_directory_listeners()
         std::ostringstream msg;
         std::vector<std::string> eventNames { "created", "modified" };
 
-        msg << eventNames[(int)events] << " :: " << filePath.filename() << std::endl;
+        msg << eventNames[(int)events] << " :: " << filePath.filename();
         m_logger->log(msg.str());
 
         m_queue->push_item(filePath);
