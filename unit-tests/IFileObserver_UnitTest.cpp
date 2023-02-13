@@ -17,6 +17,7 @@ namespace HotBackup_UnitTests
     protected:
         IFileObserver_UnitTest()
         {
+            std::filesystem::remove_all(m_testingDirectory);
             std::filesystem::create_directory(m_testingDirectory);
 
             m_subject = HotBackupFactory::create_file_observer_subject("notifier");

@@ -17,6 +17,8 @@ namespace HotBackup_UnitTests
         IFileBackupQueue_UnitTest() :
             m_backupQueue(HotBackupFactory::create_file_backup_queue())
         {
+            std::filesystem::remove_all(m_testingDirectory);
+
             std::filesystem::create_directory(m_testingDirectory);
         }
 

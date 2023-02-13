@@ -18,6 +18,9 @@ namespace HotBackup_UnitTests
             m_fileDeleterPlugin { std::make_shared<IFileDeleterPlugin_Mock>() },
             m_logger { std::make_shared<ILogger_Mock>() }
         {
+            std::filesystem::remove_all(m_testingDirectory);
+            std::filesystem::remove_all(m_backupDirectory);
+
             std::filesystem::create_directory(m_backupDirectory);
             m_fileDeleterPlugin->init(m_logger, m_backupDirectory);
         }

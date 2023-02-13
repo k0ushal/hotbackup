@@ -2,6 +2,7 @@
 #define _FILE_DELETER_PLUGIN_H_
 
 #include <memory>
+#include <vector>
 #include <mutex>
 #include <future>
 #include <atomic>

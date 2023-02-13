@@ -17,6 +17,11 @@ namespace HotBackup_Mocks
         {
         }
 
+        virtual void shutdown() override
+        {
+            
+        }
+
         void init(const std::filesystem::path& logfilePath) override
         {
         }

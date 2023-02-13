@@ -24,6 +24,8 @@ namespace HotBackup_UnitTests
             m_backupManager { HotBackupFactory::create_backup_manager() },
             m_logger { std::make_shared<ILogger_Mock>() }
         {
+            std::filesystem::remove_all(m_testingDirectory);
+            std::filesystem::remove_all(m_backupDirectory);
             m_backupManager->init(m_backupDirectory, std::dynamic_pointer_cast<IFileBackupQueueConsumer>(m_queue), m_logger);
         }
 
@@ -103,7 +105,7 @@ namespace HotBackup_UnitTests
         sleep(3);
 
         //  Extract filenames from log messages.
-        std::regex pattern { "backedup \\(\"/tmp/testing/([a-z]+)\"\\)" };
+        std::regex pattern { "backedup \\(([a-z]+)\\)" };
         std::smatch match;
         std::set<std::string> backedUpFiles;
 
