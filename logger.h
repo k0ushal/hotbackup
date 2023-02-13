@@ -35,6 +35,5 @@ namespace HotBackup
         std::vector<std::string> m_logs;
         std::filesystem::path m_logfilePath;
         std::mutex m_mutex;
-        std::fstream m_logfileStream;
     };
 }

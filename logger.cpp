@@ -9,18 +9,12 @@ using HotBackup::Logger;
 
 void Logger::init(const std::filesystem::path& logfilePath)
 {
-    if (std::filesystem::is_directory(logfilePath))
+    m_logfilePath = logfilePath;
+
+    if (std::filesystem::is_directory(m_logfilePath))
     {
         std::ostringstream msg;
         msg << "Invalid log file path (" << logfilePath << ")";
-        throw std::runtime_error(msg.str());
-    }
-
-    m_logfileStream = std::fstream(logfilePath, std::ios::in | std::ios::out);
-    if (not m_logfileStream.good())
-    {
-        std::ostringstream msg;
-        msg << "Unable to open log file (" << logfilePath << ")";
         throw std::runtime_error(msg.str());
     }
 
@@ -35,19 +29,24 @@ void Logger::shutdown()
 void Logger::load_previous_logs()
 {
     std::string line;
-    while (std::getline(m_logfileStream, line))
+
+    auto fStream { std::ifstream(m_logfilePath) };
+    if (not fStream.good())
+        return;
+
+    while (std::getline(fStream, line))
         m_logs.push_back(line);
 }
 
 void Logger::flush_logs_to_file()
 {
-    if (not m_logfileStream.good())
-        return;
+    auto fStream { std::ofstream(m_logfilePath) };
 
     for (auto& line : m_logs)
-        m_logfileStream << line << std::endl;
+        fStream << line << std::endl;
 
-    m_logfileStream.flush();
+    fStream.flush();
+    fStream.close();
 }
 
 void Logger::log(const std::string logMessage)

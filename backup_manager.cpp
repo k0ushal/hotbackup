@@ -129,6 +129,6 @@ void BackupManager::backup_file(const std::filesystem::path& sourceFile)
         throw std::runtime_error(msg.str().c_str());
     }
 
-    msg << "backedup (" << sourceFile << ")";
+    msg << "backedup (" << sourceFile.filename().u8string() << ")";
     m_logger->log(msg.str());
 }

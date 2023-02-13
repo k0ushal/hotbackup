@@ -28,6 +28,9 @@ HotBackupApp::HotBackupApp(
 
 void HotBackupApp::init()
 {
+    if (m_shutdown)
+        return;
+
     m_logger = HotBackupFactory::create_logger();
     m_logger->init("./audit.log");
 
@@ -44,6 +47,9 @@ void HotBackupApp::init()
 
 void HotBackupApp::start_directory_listeners()
 {
+    if (m_shutdown)
+        return;
+
     //  Changed files handler.
     static std::function<bool(std::filesystem::path, FileEvents)> changedFilesHandler =
     [&](std::filesystem::path filePath, FileEvents events) -> bool {
@@ -51,7 +57,7 @@ void HotBackupApp::start_directory_listeners()
         std::ostringstream msg;
         std::vector<std::string> eventNames { "created", "modified" };
 
-        msg << eventNames[(int)events] << " :: " << filePath.filename();
+        msg << eventNames[(int)events] << " (" << filePath.filename().u8string() << ")";
         m_logger->log(msg.str());
 
         m_queue->push_item(filePath);
@@ -76,6 +82,9 @@ void HotBackupApp::start_directory_listeners()
 
 void HotBackupApp::start_backup_workers()
 {
+    if (m_shutdown)
+        return;
+
     m_backupManager->init(
         m_backupDirectory,
         std::dynamic_pointer_cast<IFileBackupQueueConsumer>(m_queue),
@@ -89,5 +98,7 @@ void HotBackupApp::shutdown()
 {
     m_shutdown = true;
     m_fileObserver->stop_observer();
+    m_queue->shutdown();
     m_backupManager->stop_workers();
+    m_logger->shutdown();
 }

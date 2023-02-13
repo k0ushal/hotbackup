@@ -13,15 +13,6 @@ namespace FileUtils
         FE_MODIFIED
     };
 
-    //  Collection of files logically grouped to become a
-    //  single watcher target.
-    //  The template arg determines the type of the watchable
-    //  subject for the current platform which usually will
-    //  be the type used to identify file descriptors.
-    // 
-    //  For Windows, it'll be HANDLE.
-    //  For linux, it is int.
-    //
     class IFileNotifier
     {
     public:
@@ -32,7 +23,7 @@ namespace FileUtils
         virtual void add_file(const std::filesystem::path& targetFile) = 0;
         virtual void remove_file(const std::filesystem::path& targetFile) = 0;
 
-        //  This is a blocking call.
+        //  This is a non-blocking call.
         //  The callback is called once per altered file found.
         //  The return value from callback() indicates whether or
         //  not to continue fetching changed files list.
