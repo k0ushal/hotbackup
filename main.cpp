@@ -12,6 +12,7 @@
 #include "interfaces/ilogger.h"
 #include "hotbackup_factory.h"
 #include "HotBackupApp.h"
+#include "MenuCommands.h"
 
 using FileUtils::ISubject;
 using FileUtils::IFileObserver;
@@ -20,6 +21,8 @@ using FileUtils::FileEvents;
 using HotBackup::HotBackupFactory;
 using HotBackup::HotBackupApp;
 using HotBackup::ILogger;
+using HotBackup::MenuCommands;
+
 
 int main(int argc, char* argv[])
 {
@@ -35,6 +38,7 @@ int main(int argc, char* argv[])
 
     try
     {
+        MenuCommands menu;
         HotBackupApp app(hotDirectory, backupDirectory);
 
         app.init();
@@ -43,6 +47,9 @@ int main(int argc, char* argv[])
 
         while (true)
         {
+            menu.show_command_options();
+            auto cmd { menu.get_user_command() };
+
             std::cout << "Type [exit] to terminate" << std::endl;
             std::string input;
             std::cin >> input;
